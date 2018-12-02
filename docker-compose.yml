@@ -1,0 +1,45 @@
+version: '3'
+services:
+    php-apache:
+        build:
+            context: ./php-apache
+        ports:
+            - 80:80
+        volumes:
+            - ./DocumentRoot:/var/www/html
+        links:
+            - 'mariadb'
+
+    mariadb:
+        image: mariadb:10.1
+        volumes:
+            - mariadb:/var/lib/mysql
+        environment:
+            TZ: "Europe/Brussels"
+            MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+            MYSQL_ROOT_PASSWORD: "louis"
+            MYSQL_USER: 'louis'
+            MYSQL_PASSWORD: 'louis'
+            MYSQL_DATABASE: 'shipping'
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        links:
+            - mariadb
+        ports:
+            - 9191:80
+        environment:
+            PMA_HOST: mariadb
+
+    portainer:
+        image: portainer/portainer
+        ports:
+          - "9000:9000"
+        command: -H unix:///var/run/docker.sock
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - portainer_data:/data
+
+volumes:
+    mariadb:
+    portainer_data:
